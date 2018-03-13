@@ -1,35 +1,56 @@
 import './styles/style.scss';
-import {on, sanitizeString, getPromiseData, axelVisar, flatten} from './helpers/';
+import {on, getPromiseData, uriEncodeParams, flattenArray} from './helpers/';
 
 class Mashed {
   constructor(element) {
     this.root = element;
 
     this.search = this.search.bind(this);
+    this.updateSubmitButtonStatus = this.updateSubmitButtonStatus.bind(this);
+
     this.addEventListeners();
+    this.updateSubmitButtonStatus();
+  }
+
+  updateSubmitButtonStatus() {
+    if(this.input.value.length < 2) {
+      this.searchBtn.disabled = true;
+    } else {
+      this.searchBtn.disabled = false;
+    }
   }
 
   addEventListeners() {
-    const input = document.querySelector('.form-control');
-    const searchBtn = document.querySelector('button');
+    this.input = document.querySelector('input.form-control');
+    this.sidebarWords = document.querySelectorAll('.words');
+    this.searchBtn = document.querySelector('button');
 
-    searchBtn.addEventListener('click', this.search);
+    this.searchBtn.addEventListener('click', this.search);
+    this.sidebarWords.addEventListener('click', (event) => this.search(event));
+    this.input.addEventListener('keyup', this.updateSubmitButtonStatus);
   }
  
-  search() {
+  search(event, searchString = null) {
+    event.preventDefault();
+
     let searchQuery = this.input.value;
 
+    this.input.value = searchString ? searchString : searchQuery;
+    searchQuery = searchQuery.length ? searchQuery : searchString;
+  
     let apiCalls = [
       this.fetchPhotos(searchQuery),
       this.fetchWords(searchQuery)
     ];  
 
-    Promise.all(apiCalls)
-      .then(result => {
-        this.renderPhotos(res[0])
+    getPromiseData(apiCalls)
+      .then(res => {
+        this.renderPhotos(res[0]),
         this.renderWords(res[1])
       })
-      .catch(reject);
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   renderPhotos(data) {
@@ -55,6 +76,8 @@ class Mashed {
       });
     });
 
+    words = flattenArray(words);
+
     const wordRes = document.querySelector('.words');
     wordRes.innerHTML = "";
 
@@ -62,11 +85,12 @@ class Mashed {
       const wordList = document.createElement('li');
       const wordAnchor = document.createElement('a');
 
-      wordAnchor.href = '#';
       wordAnchor.textContent = word;
 
       wordRes.appendChild(wordList);
       wordList.appendChild(wordAnchor);
+
+      wordList.addEventListener('click', (event) => this.search(event, word))
     });
   }
 
@@ -78,15 +102,11 @@ class Mashed {
     let flickrQueryParams =
       '&text=' + searchQuery + 
       '&extras=original_format,url_q,url_o&format=json&nojsoncallback=1' +
-      '&per_page=5'
+      '&per_page=10' +
+      '&safe_search=1'
     let flickrUrl = resourceUrl + flickrAPIkey + flickrQueryParams
 
     return fetch(flickrUrl);
-      // .then(res => res.json())
-      // .then(res => {
-      //   this.renderPhotos(res.photos.photo);
-      // })
-      // .catch(err => console.error(err))
   }
 
   fetchWords(searchQuery) {
@@ -94,12 +114,6 @@ class Mashed {
     let wordLabUrl = `http://words.bighugelabs.com/api/2/${wordLabAPIkey}/${searchQuery}/json`
 
     return fetch(wordLabUrl);
-    //   .then(res => res.json())
-    //   .then(res => {
-    //     console.log('Test BigHugeLabs!')
-    //     console.log(res)
-    // })
-    // .catch(err => console.error(err))
   }
 } 
 

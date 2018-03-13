@@ -12,7 +12,7 @@ NodeList.prototype.on = NodeList.prototype.addEventListener = function (name, fn
 };
 
 /**
- *
+ * 
  * @param {Array} arr Array of promises to be resolved
  */
 export function getPromiseData(promises) {
@@ -30,17 +30,44 @@ export function getPromiseData(promises) {
 }
 
 /**
- *
- * @param {Object} data
+ * Helps with URI encoding for URL params
+ * 
+ * Example:
+ * 
+ * const params = {
+ *  key: value,
+ *  other key: otherValue,
+ *  arrayKey: [1, 2, 3]
+ * }
+ * 
+ * const encodedParams = uriEncodeParams(params);
+ * 
+ * encodedParams = "?key=value&other=value&arrayKey=1,2,3"
+ * @param {Object} params
  */
-export function axelVisar(data) {
-  return Object.keys(data).map(function(key) {
-      console.log([key, data[key]]);
-      return [key, data[key]].map(encodeURIComponent).join("=");
+export function uriEncodeParams(params) {
+  return Object.keys(params).map(function(key) {
+      console.log([key, params[key]]);
+      return [key, params[key]].map(encodeURIComponent).join("=");
   }).join("&");
 }
 
-export function flatten (arr) {
-  const flat = [].concat(...arr);
-  return flat.some(Array.isArray) ? flatten(flat) : flat;
+/**
+ * This function recursively flattenedArraytens nested arrays.
+ * 
+ * Example:
+ * 
+ * const myNestedArr = [1, [2, 3, [4, 5]]];
+ * 
+ * const flattenedArray = flattenArray(myNestedArray);
+ * 
+ * Output: 
+ * 
+ * flattenedArray = [1, 2, 3, 4, 5];
+ *
+ * @param {*} nestedArray 
+ */
+export function flattenArray (nestedArray) {
+  const flattenedArray = [].concat(...nestedArray);
+  return flattenedArray.some(Array.isArray) ? flattenArray(flattenedArray) : flattenedArray;
 }
