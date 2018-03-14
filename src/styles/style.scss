@@ -68,6 +68,9 @@ aside {
             justify-content: center;
             list-style: none;
             line-height: 70px;
+            &:hover{
+                cursor: pointer;
+            }
         }
     }
 }
