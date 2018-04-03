@@ -1,0 +1,15 @@
+deploy.sh
+.eslintrc.js
+.gitignore
+.prettierrc
+.yarnclean
+.git
+.env
+node_modules
+src
+package.json
+webpack.config.js
+yarn.lock
+yarn-error.log
+README.md
+rsync_exclude.txt
